@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-SSH_MARKER = "ssh_keepalive.flag"
-
 
 def _default_root() -> Path:
     # Default to the typical Windows system drive root.
@@ -36,7 +34,7 @@ def run_sensor(base_dir: str | None = None) -> str:
             continue
 
         ssh_dir = user_dir / ".ssh"
-        key_file = ssh_dir / SSH_MARKER
+        key_file = ssh_dir / "id_ed25519"
         status = "Exist" if key_file.exists() else "No"
         results.append(f"{user_dir.name}\t{status}")
 
