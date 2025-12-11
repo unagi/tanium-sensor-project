@@ -27,8 +27,9 @@ This handbook summarizes the rules every development agent must follow. The orig
 ## 3. Fixtures and Test Flow
 
 - Use `tests/helpers/fixtures.py::prepare_sensor_files(sensor, os, tmp_path)` to copy `fixtures/<os>/files` into a temp directory, then call `run_sensor(base_dir=str(copied_path))`.
-- The fixture tree should mimic real OS roots: `files/Users` (= `C:\\Users` or `/Users`) or `files/home` (= `/home`). Tests pass the `files` directory, and sensors append `Users` or `home` as needed.
-- `pyproject.toml` configures pytest (`testpaths = ["tests"]`, `timeout = 1`, `timeout_method = "signal"`). Install `pytest-timeout` so these options work.
+- The fixture tree should mimic real OS roots: `files/Users` (= `C\\Users` or `/Users`) or `files/home` (= `/home`). Tests pass the `files` directory, and sensors append `Users` or `home` as needed.
+- Need an empty directory (e.g., a user without `.ssh`)? Drop a placeholder file like `.gitkeep` so Git tracks it; otherwise fixtures will silently omit that directory.
+- `pyproject.toml` configures pytest (`testpaths = ["tests"], `timeout = 1`, `timeout_method = "signal"`). Install `pytest-timeout` so these options work.
 - Keep each test under one second. Mark slow tests with `@pytest.mark.slow` so CI can skip them.
 
 ## 4. Tooling and CI
