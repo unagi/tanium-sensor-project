@@ -18,7 +18,7 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 timeout = 1
-timeout_method = "signal"
+timeout_method = "thread"
 markers = [
   "slow: Long-running tests that CI should skip.",
 ]
