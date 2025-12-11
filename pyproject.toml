@@ -12,6 +12,7 @@ dev = [
   "black",
   "pytest",
   "pytest-timeout",
+  "poethepoet",
 ]
 
 [tool.pytest.ini_options]
@@ -30,3 +31,11 @@ src = ["sensors", "tests"]
 [tool.black]
 line-length = 100
 target-version = ["py311"]
+
+[tool.poe.tasks]
+lint = "ruff check ."
+format = "black . --check"
+test = "pytest -m \"not slow\""
+"test-linux" = "pytest tests/sensors/foo/test_linux.py -m \"not slow\""
+"test-mac" = "pytest tests/sensors/foo/test_mac.py -m \"not slow\""
+"test-win" = "pytest tests/sensors/foo/test_win.py -m \"not slow\""

@@ -22,11 +22,11 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -e ".[dev]"
 
-      - name: Lint (Ruff)
-        run: ruff check .
+      - name: Poe lint
+        run: python -m poe lint
 
-      - name: Format check (Black)
-        run: black . --check
+      - name: Poe format check
+        run: python -m poe format
 
   tests:
     runs-on: ${{ matrix.os }}
@@ -35,14 +35,14 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            arch: linux
-            test_target: tests/sensors/foo/test_linux.py
+            task: test-linux
+            label: linux
           - os: macos-latest
-            arch: mac
-            test_target: tests/sensors/foo/test_mac.py
+            task: test-mac
+            label: mac
           - os: windows-latest
-            arch: windows
-            test_target: tests/sensors/foo/test_win.py
+            task: test-win
+            label: windows
 
     steps:
       - name: Checkout
@@ -56,5 +56,5 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -e ".[dev]"
 
-      - name: Pytest (${{ matrix.arch }})
-        run: python -m pytest ${{ matrix.test_target }} -m "not slow"
+      - name: Poe pytest (${{ matrix.label }})
+        run: python -m poe ${{ matrix.task }}

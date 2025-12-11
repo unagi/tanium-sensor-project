@@ -34,15 +34,16 @@ This handbook summarizes the rules every development agent must follow. The orig
 
 ## 4. Tooling and CI
 
-- Install dev tools via `pip install -e ".[dev]"` or `uv pip install -e ".[dev]"` (Ruff, Black, pytest, pytest-timeout).
-- Local quality checklist (run before every PR):
+- Install dev tools via `pip install -e ".[dev]"` or `uv pip install -e ".[dev]"` (Ruff, Black, pytest, pytest-timeout, Poe).
+- Local Poe tasks (run before every PR):
   ```bash
-  uv run ruff check .
-  uv run black . --check
-  uv run pytest -m "not slow"
+  uv run poe lint
+  uv run poe format
+  uv run poe test
   ```
-  If you are not using `uv`, replace `uv run` with the equivalent virtualenv activation (`. .venv/bin/activate`).
-- `.github/workflows/ci.yml` mirrors these steps on GitHub Actions (Ubuntu, Python 3.11). Update the workflow whenever tooling or rules change.
+  Additional per-OS runs are available via `uv run poe test-linux`, `uv run poe test-mac`, and `uv run poe test-win`.
+  If you are not using `uv`, activate your env first and run `poe <task>`.
+- `.github/workflows/ci.yml` calls the same Poe tasks on GitHub Actions, so keep them up to date whenever workflows change.
 
 ## 5. Workflow Guidance
 
