@@ -1,4 +1,5 @@
 """Sample Windows Tanium sensor that reports SSH key presence per user."""
+
 from __future__ import annotations
 
 from pathlib import Path

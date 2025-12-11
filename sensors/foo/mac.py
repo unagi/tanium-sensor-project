@@ -1,4 +1,5 @@
 """Sample macOS Tanium sensor mirroring the Windows variant."""
+
 from __future__ import annotations
 
 from pathlib import Path

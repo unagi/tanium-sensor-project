@@ -1,4 +1,5 @@
 """Utilities for preparing fixture directories for Tanium sensors."""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -1,4 +1,5 @@
 """Sample Linux Tanium sensor reporting SSH key presence."""
+
 from __future__ import annotations
 
 from pathlib import Path
