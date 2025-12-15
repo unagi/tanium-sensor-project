@@ -1,5 +1,7 @@
 # Tanium Custom Sensor Project
 
+[![CI](https://github.com/unagi/tanium-sensor-project/actions/workflows/ci.yml/badge.svg)](https://github.com/unagi/tanium-sensor-project/actions/workflows/ci.yml)
+
 This repository bootstraps Tanium custom sensors written in Python. Each sensor is a single file per OS so the file can be copied straight into Tanium. Local development uses fixtures and Poe tasks for consistent lint/test flows, while CI enforces Ruff, Black, and pytest to maintain quality.
 
 ## Policies

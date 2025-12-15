@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
 
 jobs:
-  lint:
+  shared-checks:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,18 @@ jobs:
       - name: Poe Tanium global tests
         run: poe test-global
 
-  tests:
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "### Shared Checks (Python 3.12)"
+            echo ""
+            echo "- ✅ Ruff lint (\`poe lint\`)"
+            echo "- ✅ Black format check (\`poe format\`)"
+            echo "- ✅ Tanium multi-column tests (\`poe test-global\`)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  os-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -61,3 +72,12 @@ jobs:
 
       - name: Poe pytest (${{ matrix.label }})
         run: poe ${{ matrix.task }}
+
+      - name: Publish ${{ matrix.label }} summary
+        if: always()
+        run: |
+          {
+            echo "### OS Matrix: ${{ matrix.label }}"
+            echo ""
+            echo "- ✅ Python 3.12 tests via \`poe ${{ matrix.task }}\` on ${{ runner.os }}"
+          } >> "$GITHUB_STEP_SUMMARY"
