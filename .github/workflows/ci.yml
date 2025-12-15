@@ -32,6 +32,14 @@ jobs:
         run: |
           set -o pipefail
           poe test-global 2>&1 | tee poe-test-global.log
+          python - <<'PY'
+from pathlib import Path
+import re
+
+raw = Path("poe-test-global.log").read_text(encoding="utf-8", errors="ignore")
+clean = re.sub(r"\x1b\\[[0-9;]*[A-Za-z]", "", raw)
+Path("poe-test-global-clean.log").write_text(clean, encoding="utf-8")
+PY
 
       - name: Publish summary
         if: always()
@@ -42,11 +50,11 @@ jobs:
             echo "- ✅ Ruff lint (\`poe lint\`)"
             echo "- ✅ Black format check (\`poe format\`)"
             echo "- ✅ Tanium multi-column tests (\`poe test-global\`)"
-            if [ -f poe-test-global.log ]; then
+            if [ -f poe-test-global-clean.log ]; then
               echo ""
               echo "#### pytest-spec excerpt"
               echo '```'
-              tail -n 40 poe-test-global.log
+              tail -n 40 poe-test-global-clean.log
               echo '```'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
@@ -84,6 +92,13 @@ jobs:
         run: |
           set -o pipefail
           poe ${{ matrix.task }} 2>&1 | tee poe-${{ matrix.label }}.log
+          python - <<'PY'
+from pathlib import Path
+import re
+raw = Path("poe-${{ matrix.label }}.log").read_text(encoding="utf-8", errors="ignore")
+clean = re.sub(r"\x1b\\[[0-9;]*[A-Za-z]", "", raw)
+Path("poe-${{ matrix.label }}-clean.log").write_text(clean, encoding="utf-8")
+PY
 
       - name: Publish ${{ matrix.label }} summary
         if: always()
@@ -93,11 +108,11 @@ jobs:
             echo "### OS Matrix: ${{ matrix.label }}"
             echo ""
             echo "- ✅ Python 3.12 tests via \`poe ${{ matrix.task }}\` on ${{ runner.os }}"
-            if [ -f poe-${{ matrix.label }}.log ]; then
+            if [ -f poe-${{ matrix.label }}-clean.log ]; then
               echo ""
               echo "#### pytest-spec excerpt"
               echo '```'
-              tail -n 40 poe-${{ matrix.label }}.log
+              tail -n 40 poe-${{ matrix.label }}-clean.log
               echo '```'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
