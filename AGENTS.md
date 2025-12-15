@@ -5,6 +5,7 @@ This handbook summarizes the rules every development agent must follow. The orig
 ## 1. Repository Structure Basics
 
 - Create `sensors/<sensor>/` per sensor and keep three files (`win.py`, `mac.py`, `linux.py`).
+- Document every sensor directory with `README.md` (EN) and `README.ja.md` (JP) that describe the sensor purpose, implementation, fixtures/tests, and Tanium metadata. Copy `sensors/foo/README*.md` as the template when bootstrapping a new sensor.
 - Each OS file **must remain self-contained**. Import only from the standard library; never add shared helper modules.
 - Place test collateral under `tests/`. Store fixture trees under `tests/sensors/<sensor>/fixtures/<os>/files/...` so tests and fixtures live together.
 - Keep Tanium deployment metadata in `sensors/<sensor>/tanium_settings.yaml`. This file defines the console settings (name, category, TTL, delimiter, column schema, etc.) for the sensor.

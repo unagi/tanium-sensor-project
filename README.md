@@ -45,3 +45,5 @@ Sensors that shell out to the host OS should mark their pytest modules so they s
 
 - [Foo sensor guide (English)](sensors/foo/README.md)
 - [Foo sensor guide (日本語)](sensors/foo/README.ja.md)
+- [Bar sensor guide (English)](sensors/bar/README.md)
+- [Bar sensor guide (日本語)](sensors/bar/README.ja.md)
