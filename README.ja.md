@@ -39,3 +39,5 @@ uv run poe test-global
 
 - [Foo センサーガイド (英語)](sensors/foo/README.md)
 - [Foo センサーガイド (日本語)](sensors/foo/README.ja.md)
+- [Bar センサーガイド (英語)](sensors/bar/README.md)
+- [Bar センサーガイド (日本語)](sensors/bar/README.ja.md)
