@@ -15,15 +15,19 @@
 
 ## Fixtures
 
-fixtures は `sensors/foo/fixtures/<os>/files` に配置します。`files` 直下が実際の OS ルートを模倣します。
+fixtures は `tests/sensors/foo/fixtures/<os>/files` に配置します。`files` 直下が実際の OS ルートを模倣します。
 
 ```
-sensors/foo/fixtures/win/files/Users/alice/.ssh/id_ed25519
-sensors/foo/fixtures/mac/files/Users/charlie/.ssh/id_ed25519
-sensors/foo/fixtures/linux/files/home/erin/.ssh/id_ed25519
+tests/sensors/foo/fixtures/win/files/Users/alice/.ssh/id_ed25519
+tests/sensors/foo/fixtures/mac/files/Users/charlie/.ssh/id_ed25519
+tests/sensors/foo/fixtures/linux/files/home/erin/.ssh/id_ed25519
 ```
 
 テストでは `prepare_sensor_files("foo", <os>, tmp_path)` を呼び、`files` ツリーをテンポラリへコピーして `base_dir` として渡します。
+
+## Tanium 設定
+
+`sensors/foo/tanium_settings.yaml` に Tanium 取り込み用メタデータをまとめています。`multi_column` センサーとしてタブ区切り 2 列（`User`, `SSH Key Status`）を返す点や TTL・カテゴリをここで定義します。出力形式を変えた場合は必ず YAML も更新してください。
 
 ## テスト
 
@@ -46,7 +50,7 @@ pytest tests/sensors/foo -m "not slow"
 
 1. `sensors/foo` をコピーし、新しいセンサー名にリネーム。
 2. デフォルトパスや copy-block 部分、docstring を目的に合わせて変更。
-3. fixtures ツリーを複製し、現実的なファイルを配置。
+3. `tests/sensors/<sensor>/fixtures` に fixtures ツリーを複製し、現実的なファイルを配置。
 4. テストをコピーして新センサー向けに import・期待値を更新。
 
 `# === SENSOR_COPY_BLOCK ...` のマーカーは必ず維持してください。OS 間でのロジック差分管理が容易になります。

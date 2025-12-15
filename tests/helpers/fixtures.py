@@ -2,14 +2,22 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 
 def prepare_sensor_files(sensor_name: str, os_name: str, tmp_root: Path) -> Path:
     """Copy fixture trees to a temp directory and return the new root for tests."""
     repo_root = Path(__file__).resolve().parents[2]
-    src = repo_root / "sensors" / sensor_name / "fixtures" / os_name / "files"
+    src = (
+        repo_root
+        / "tests"
+        / "sensors"
+        / sensor_name
+        / "fixtures"
+        / os_name
+        / "files"
+    )
 
     if not src.exists():
         raise FileNotFoundError(f"Fixture not found: {src}")

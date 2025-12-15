@@ -3,7 +3,7 @@ name = "tanium-sensors"
 version = "0.1.0"
 description = "Sample Tanium custom sensor project"
 authors = [{ name = "Tanium Sensor Team" }]
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 readme = "README.md"
 
 [project.optional-dependencies]
@@ -12,25 +12,31 @@ dev = [
   "black",
   "pytest",
   "pytest-timeout",
+  "pytest-spec",
   "poethepoet",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 timeout = 1
-timeout_method = "thread"
+timeout_method = "signal"
 markers = [
   "slow: Long-running tests that CI should skip.",
 ]
+addopts = "--spec"
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 src = ["sensors", "tests"]
+
+[tool.ruff.lint]
+extend-select = ["B", "C90", "E", "F", "I", "UP", "W"]
+ignore = ["E501"]
 
 [tool.black]
 line-length = 100
-target-version = ["py311"]
+target-version = ["py312"]
 
 [tool.poe.tasks]
 lint = "ruff check ."
