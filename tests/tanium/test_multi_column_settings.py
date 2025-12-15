@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import sys
 from pathlib import Path
 from typing import TypedDict
 
@@ -55,6 +56,8 @@ def _iter_multi_column_cases() -> list[_MultiColumnCase]:
             files_dir = os_dir / "files"
             if not os_dir.is_dir() or not files_dir.exists():
                 continue
+            if not _os_matches_host(os_dir.name):
+                continue
 
             cases.append(
                 _MultiColumnCase(
@@ -67,6 +70,17 @@ def _iter_multi_column_cases() -> list[_MultiColumnCase]:
             )
 
     return cases
+
+
+def _os_matches_host(os_name: str) -> bool:
+    platform = sys.platform
+    if os_name == "linux":
+        return platform.startswith("linux")
+    if os_name == "mac":
+        return platform == "darwin"
+    if os_name == "win":
+        return platform in {"win32", "cygwin"}
+    return False
 
 
 MULTI_COLUMN_CASES = _iter_multi_column_cases()

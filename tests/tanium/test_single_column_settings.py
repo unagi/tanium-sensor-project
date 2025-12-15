@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import TypedDict
 
@@ -9,9 +10,20 @@ import pytest
 import yaml
 
 
+def _os_matches_host(os_name: str) -> bool:
+    platform = sys.platform
+    if os_name == "linux":
+        return platform.startswith("linux")
+    if os_name == "mac":
+        return platform == "darwin"
+    if os_name == "win":
+        return platform in {"win32", "cygwin"}
+    return False
+
+
 class _SingleColumnCase(TypedDict):
     sensor: str
-    settings_path: Path
+    os: str
     tanium: dict[str, object]
 
 
@@ -34,25 +46,32 @@ def _iter_single_column_cases() -> list[_SingleColumnCase]:
         if tanium_section.get("multi_column"):
             continue
 
-        cases.append(
-            _SingleColumnCase(
-                sensor=sensor_dir.name,
-                settings_path=settings_path,
-                tanium=tanium_section,
+        for os_name in ("linux", "mac", "win"):
+            os_file = sensor_dir / f"{os_name}.py"
+            if not os_file.exists():
+                continue
+            if not _os_matches_host(os_name):
+                continue
+
+            cases.append(
+                _SingleColumnCase(
+                    sensor=sensor_dir.name,
+                    os=os_name,
+                    tanium=tanium_section,
+                )
             )
-        )
 
     return cases
 
 
 CASES = _iter_single_column_cases()
-CASE_IDS = [case["sensor"] for case in CASES]
+CASE_IDS = [f"{case['sensor']}-{case['os']}" for case in CASES]
 
 
 @pytest.mark.parametrize("case", CASES, ids=CASE_IDS)
 def test_single_column_settings(case: _SingleColumnCase) -> None:
     if not CASES:
-        pytest.skip("No single-column sensors defined.")
+        pytest.skip("No single-column sensors defined for this platform.")
 
     cfg = case["tanium"]
 
