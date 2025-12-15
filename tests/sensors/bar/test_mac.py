@@ -6,7 +6,6 @@ import pytest
 
 from sensors.bar import mac
 
-
 pytestmark = [
     pytest.mark.skipif(not os.environ.get("CI"), reason="bar sensor tests run only in CI."),
     pytest.mark.skipif(sys.platform != "darwin", reason="macOS sensor test requires macOS."),

@@ -29,6 +29,8 @@ def _sanitize_build_number(raw_value: str, pattern: re.Pattern[str]) -> str:
     if match:
         return match.group(1).strip()
     return raw_value.strip()
+
+
 # === SENSOR_COPY_BLOCK END ===
 
 

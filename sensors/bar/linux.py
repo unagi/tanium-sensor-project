@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import re
 
-
 _COMMAND = "uname -r"
 _BUILD_PATTERN = re.compile(r"([0-9]+(?:\.[0-9]+){1,2}[\w\-.]*)")
 
@@ -30,6 +29,8 @@ def _sanitize_build_number(raw_value: str, pattern: re.Pattern[str]) -> str:
     if match:
         return match.group(1).strip()
     return raw_value.strip()
+
+
 # === SENSOR_COPY_BLOCK END ===
 
 
