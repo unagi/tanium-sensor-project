@@ -1,7 +1,8 @@
 from pathlib import Path
 
-from sensors.foo import win
 from tests.helpers.fixtures import prepare_sensor_files
+
+from sensors.foo import win
 
 
 def test_win_reports_ssh_keys(tmp_path: Path) -> None:
@@ -12,3 +13,8 @@ def test_win_reports_ssh_keys(tmp_path: Path) -> None:
 
     assert "alice\tExist" in lines
     assert "bob\tNo" in lines
+
+
+def test_win_handles_missing_users(tmp_path: Path) -> None:
+    result = win.run_sensor(base_dir=str(tmp_path))
+    assert result == ""

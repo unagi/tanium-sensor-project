@@ -1,0 +1,9 @@
+tanium:
+  name: Foo - SSH Key Presence
+  category: Endpoint Hygiene
+  ttl_minutes: 15
+  multi_column: true
+  delimiter: "\t"
+  columns:
+    - { name: User, type: text }
+    - { name: SSH Key Status, type: text }

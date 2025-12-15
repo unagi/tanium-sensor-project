@@ -7,17 +7,17 @@ on:
     branches: [ main, master ]
 
 jobs:
-  lint:
+  shared-checks:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: python -m pip install -e ".[dev]"
@@ -28,7 +28,21 @@ jobs:
       - name: Poe format check
         run: poe format
 
-  tests:
+      - name: Poe Tanium global tests
+        run: poe test-global
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "### Shared Checks (Python 3.12)"
+            echo ""
+            echo "- ✅ Ruff lint (\`poe lint\`)"
+            echo "- ✅ Black format check (\`poe format\`)"
+            echo "- ✅ Tanium multi-column tests (\`poe test-global\`)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  os-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -48,13 +62,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: python -m pip install -e ".[dev]"
 
       - name: Poe pytest (${{ matrix.label }})
         run: poe ${{ matrix.task }}
+
+      - name: Publish ${{ matrix.label }} summary
+        if: always()
+        run: |
+          {
+            echo "### OS Matrix: ${{ matrix.label }}"
+            echo ""
+            echo "- ✅ Python 3.12 tests via \`poe ${{ matrix.task }}\` on ${{ runner.os }}"
+          } >> "$GITHUB_STEP_SUMMARY"

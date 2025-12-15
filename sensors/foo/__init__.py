@@ -1,5 +1,5 @@
 """Foo sensor package exposing per-OS single-file implementations."""
 
-from . import win, mac, linux
+from . import linux, mac, win
 
 __all__ = ["win", "mac", "linux"]
