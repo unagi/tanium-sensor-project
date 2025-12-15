@@ -32,7 +32,7 @@ jobs:
         run: |
           set -o pipefail
           poe test-global 2>&1 | tee poe-test-global.log
-          python -c 'from pathlib import Path; import re; raw = Path("poe-test-global.log").read_text(encoding="utf-8", errors="ignore"); clean = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", raw); Path("poe-test-global-clean.log").write_text(clean, encoding="utf-8")'
+          python -c 'from pathlib import Path; import re; raw = Path("poe-test-global.log").read_text(encoding="utf-8", errors="ignore"); clean = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", raw); clean = re.sub(r"\\u([0-9A-Fa-f]{4})", lambda m: chr(int(m.group(1), 16)), clean); Path("poe-test-global-clean.log").write_text(clean, encoding="utf-8")'
 
       - name: Publish summary
         if: always()
@@ -86,7 +86,7 @@ jobs:
           set -o pipefail
           poe ${{ matrix.task }} 2>&1 | tee poe-${{ matrix.label }}.log
           LOG_FILE="poe-${{ matrix.label }}.log" CLEAN_FILE="poe-${{ matrix.label }}-clean.log" \
-          python -c 'from pathlib import Path; import os, re; raw = Path(os.environ["LOG_FILE"]).read_text(encoding="utf-8", errors="ignore"); clean = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", raw); Path(os.environ["CLEAN_FILE"]).write_text(clean, encoding="utf-8")'
+          python -c 'from pathlib import Path; import os, re; raw = Path(os.environ["LOG_FILE"]).read_text(encoding="utf-8", errors="ignore"); clean = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", raw); clean = re.sub(r"\\u([0-9A-Fa-f]{4})", lambda m: chr(int(m.group(1), 16)), clean); Path(os.environ["CLEAN_FILE"]).write_text(clean, encoding="utf-8")'
 
       - name: Publish ${{ matrix.label }} summary
         if: always()
