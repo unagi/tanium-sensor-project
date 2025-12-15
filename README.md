@@ -24,7 +24,13 @@ uv run poe lint
 uv run poe format
 uv run poe test
 uv run poe test-global
+# OS-specific suites also rerun the Tanium metadata checks before their per-platform cases
+uv run poe test-linux
+uv run poe test-mac
+uv run poe test-win
 ```
+
+Sensors that shell out to the host OS should mark their pytest modules so they skip automatically unless both the matching platform and `CI=1` are present; this keeps local development lightweight while CI still exercises the real command calls.
 
 ## Directory Layout
 

@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from tests.helpers.fixtures import prepare_sensor_files
-
 from sensors.foo import mac
+from tests.helpers.fixtures import prepare_sensor_files
 
 
 def test_mac_reports_ssh_keys(tmp_path: Path) -> None:

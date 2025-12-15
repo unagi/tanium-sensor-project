@@ -1,0 +1,14 @@
+tanium:
+  name: Bar - OS Build Number
+  category: Tanium
+  result_type: text
+  ttl_minutes: 10
+  string_ttl_enabled: true
+  string_ttl_minutes: 10
+  max_string_enabled: true
+  ignore_case: true
+  hide_in_sensor_list: false
+  hide_in_results: false
+  multi_column: false
+  description: |
+    Returns the raw operating system build identifier as a single column text result.
