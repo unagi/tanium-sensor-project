@@ -21,6 +21,7 @@
 uv run poe lint
 uv run poe format
 uv run poe test
+uv run poe test-global
 ```
 
 ## ディレクトリ構成

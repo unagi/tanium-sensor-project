@@ -21,6 +21,7 @@ See `AGENTS.md` for the full policy document.
 uv run poe lint
 uv run poe format
 uv run poe test
+uv run poe test-global
 ```
 
 ## Directory Layout

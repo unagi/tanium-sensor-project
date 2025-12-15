@@ -28,6 +28,9 @@ jobs:
       - name: Poe format check
         run: poe format
 
+      - name: Poe Tanium global tests
+        run: poe test-global
+
   tests:
     runs-on: ${{ matrix.os }}
     strategy:

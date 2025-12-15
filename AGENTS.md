@@ -55,8 +55,9 @@ This handbook summarizes the rules every development agent must follow. The orig
   uv run poe lint
   uv run poe format
   uv run poe test
+  uv run poe test-global
   ```
-  Additional per-OS runs are available via `uv run poe test-linux`, `uv run poe test-mac`, and `uv run poe test-win`.
+  Additional per-OS runs (`uv run poe test-linux`, `uv run poe test-mac`, `uv run poe test-win`) rely on `pytest -k test_<os>` filters so every sensor under `tests/sensors/*` is covered without updating task definitions.
   If you are not using `uv`, activate your env first and run `poe <task>`.
 - `.github/workflows/ci.yml` calls the same Poe tasks on GitHub Actions, so keep them up to date whenever workflows change.
 
