@@ -57,7 +57,7 @@ This handbook summarizes the rules every development agent must follow. The orig
   uv run poe test
   uv run poe test-global
   ```
-  Additional per-OS runs (`uv run poe test-linux`, `uv run poe test-mac`, `uv run poe test-win`) rely on `pytest -k test_<os>` filters so every sensor under `tests/sensors/*` is covered without updating task definitions.
+  Additional per-OS runs (`uv run poe test-linux`, `uv run poe test-mac`, `uv run poe test-win`) now execute the Tanium metadata suite first (`tests/tanium`) and then run `pytest -k test_<os>` so every sensor under `tests/sensors/*` is covered without updating task definitions.
   If you are not using `uv`, activate your env first and run `poe <task>`.
 - `.github/workflows/ci.yml` calls the same Poe tasks on GitHub Actions, so keep them up to date whenever workflows change.
 
@@ -74,5 +74,6 @@ This handbook summarizes the rules every development agent must follow. The orig
 - **Wrong fixture root**: Always pass `<tmp>/.../files` as `base_dir`; let sensors append `Users`/`home`.
 - **Missing `pytest-timeout`**: Without installing dev deps, pytest emits `PytestConfigWarning`. Run `pip install -e ".[dev]"` first.
 - **Missing copy markers**: Without `# === SENSOR_COPY_BLOCK ...` diff tracking is painful. Keep markers synchronized.
+- **CI-only OS calls**: Tests that execute real OS commands must skip automatically unless both the matching platform and `CI=1` are present so local workflows stay fast while CI still covers the live code paths.
 
 Follow these rules and update AGENTS.md whenever new policies appear so every agent operates with the same context.

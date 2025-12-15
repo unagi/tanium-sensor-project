@@ -43,6 +43,20 @@ lint = "ruff check ."
 format = "black . --check"
 test = "pytest -m \"not slow\""
 "test-global" = "pytest tests/tanium -m \"not slow\""
-"test-linux" = "pytest tests/sensors -k test_linux -m \"not slow\""
-"test-mac" = "pytest tests/sensors -k test_mac -m \"not slow\""
-"test-win" = "pytest tests/sensors -k test_win -m \"not slow\""
+[tool.poe.tasks.test-linux]
+sequence = [
+  "pytest tests/tanium -m \"not slow\"",
+  "pytest tests/sensors -k test_linux -m \"not slow\"",
+]
+
+[tool.poe.tasks.test-mac]
+sequence = [
+  "pytest tests/tanium -m \"not slow\"",
+  "pytest tests/sensors -k test_mac -m \"not slow\"",
+]
+
+[tool.poe.tasks.test-win]
+sequence = [
+  "pytest tests/tanium -m \"not slow\"",
+  "pytest tests/sensors -k test_win -m \"not slow\"",
+]
