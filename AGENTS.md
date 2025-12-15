@@ -44,7 +44,7 @@ This handbook summarizes the rules every development agent must follow. The orig
 - The fixture tree should mimic real OS roots: `files/Users` (= `C\\Users` or `/Users`) or `files/home` (= `/home`). Tests pass the `files` directory, and sensors append `Users` or `home` as needed.
 - Need an empty directory (e.g., a user without `.ssh`)? Drop a placeholder file like `.gitkeep` so Git tracks it; otherwise fixtures will silently omit that directory.
 - Common validation under `tests/tanium/` loads every `tanium_settings.yaml` and verifies sensor output (delimiter, column count/types). Keep manifests accurate or these shared tests will fail.
-- `pyproject.toml` configures pytest (`testpaths = ["tests"], `timeout = 1`, `timeout_method = "signal"`). Install `pytest-timeout` so these options work.
+- `pyproject.toml` configures pytest (`testpaths = ["tests"], `timeout = 1`, `timeout_method = "thread"`). Install `pytest-timeout` so these options work; Windows runners cannot use `signal`, so we stick with the thread-based timeout for portability.
 - Keep each test under one second. Mark slow tests with `@pytest.mark.slow` so CI can skip them.
 
 ## 4. Tooling and CI
