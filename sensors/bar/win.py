@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import re
 
-_COMMAND = "cmd /c ver"
+_COMMAND = r'cmd.exe /d /s /c "ver"'
 _BUILD_PATTERN = re.compile(r"Version\s+([0-9.]+)")
 
 
