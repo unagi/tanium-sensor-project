@@ -41,7 +41,7 @@ def _extract_copy_blocks(source: str) -> list[str]:
 
 
 def _extract_error_codes_from_file(path: Path) -> set[str]:
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     return set(ERROR_CODE_PATTERN.findall(text))
 
 
@@ -49,7 +49,7 @@ def _extract_error_codes_from_readme(path: Path) -> set[str]:
     if not path.exists():
         return set()
 
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     section_start = text.find("## Error codes")
     if section_start == -1:
         return set()
