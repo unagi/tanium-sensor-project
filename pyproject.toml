@@ -24,6 +24,9 @@ markers = [
   "slow: Long-running tests that CI should skip.",
 ]
 addopts = "--spec"
+spec_success_indicator = "ok"
+spec_failure_indicator = "FAIL"
+spec_skipped_indicator = "SKIP"
 
 [tool.ruff]
 line-length = 100

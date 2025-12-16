@@ -2,25 +2,42 @@
 
 from __future__ import annotations
 
-import os
 import re
+import subprocess
+import sys
+from typing import Final
 
-_COMMAND = "sw_vers -buildVersion"
+_COMMAND: Final[list[str]] = ["/usr/bin/sw_vers", "-buildVersion"]
 _BUILD_PATTERN = re.compile(r"([0-9A-Z]+)")
+_TIMEOUT_SECONDS = 0.5
+
+_ERROR_EXECUTION_FAILED = "BAR201"
+_ERROR_NON_ZERO_RC = "BAR202"
 
 
 # === SENSOR_COPY_BLOCK START ===
-def _capture_command_output(command: str) -> str:
+def _emit_error(code: str, message: str) -> None:
+    sys.stderr.write(f"{code} {message}\n")
+
+
+def _capture_command_output(command: list[str]) -> str:
     """Return stdout for the OS command, falling back to empty on failure."""
     try:
-        stream = os.popen(command)
-    except OSError:
+        completed = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        _emit_error(_ERROR_EXECUTION_FAILED, f"Command failed: {exc}")
         return ""
 
-    try:
-        return stream.read()
-    finally:
-        stream.close()
+    stdout = completed.stdout
+    if completed.returncode != 0:
+        _emit_error(_ERROR_NON_ZERO_RC, f"Command exited with {completed.returncode}")
+    return stdout
 
 
 def _sanitize_build_number(raw_value: str, pattern: re.Pattern[str]) -> str:

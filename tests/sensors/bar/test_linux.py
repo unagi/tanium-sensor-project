@@ -7,7 +7,9 @@ import pytest
 from sensors.bar import linux
 
 pytestmark = [
-    pytest.mark.skipif(not os.environ.get("CI"), reason="bar sensor tests run only in CI."),
+    pytest.mark.skipif(
+        not os.environ.get("CI"), reason="Linux sensor integration test runs in CI only."
+    ),
     pytest.mark.skipif(sys.platform != "linux", reason="Linux sensor test requires Linux."),
 ]
 
