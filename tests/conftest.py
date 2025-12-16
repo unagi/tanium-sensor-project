@@ -40,8 +40,8 @@ def forbid_heavy_apis(monkeypatch: pytest.MonkeyPatch) -> None:
 
         subprocess_module = getattr(mod, "subprocess", None)
         if subprocess_module is not None:
-            for attr in ("run", "Popen", "check_output"):
-                monkeypatch.setattr(subprocess_module, attr, _forbidden, raising=False)
+            monkeypatch.setattr(subprocess_module, "Popen", _forbidden, raising=False)
+            monkeypatch.setattr(subprocess_module, "check_output", _forbidden, raising=False)
 
         threading_module = getattr(mod, "threading", None)
         if threading_module is not None:

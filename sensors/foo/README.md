@@ -12,6 +12,25 @@ This document walks through how the sample `foo` sensor is put together so you c
 - **Copy-aware logic**: The block wrapped by `# === SENSOR_COPY_BLOCK ...` must stay identical across the OS files; update all three files when making changes.
 - **Scope control**: `base_dir` is converted to `Path(base_dir)` and all filesystem operations stay beneath that directory.
 - **Output**: One tab-separated line per user directory, e.g. `alice	Exist` or `bob	No`.
+- **Sanitization**: Usernames are restricted to printable ASCII; any tab/newline/control characters become `?`. If no printable characters remain the sensor emits `<unknown>` in the `User` column.
+
+## Error codes
+
+All stderr diagnostics begin with an error code so Tanium operators can triage quickly. The matrix below lists every code and the expected remediation.
+
+| Code   | OS       | Scenario                                       | Operator action                                                                 |
+|--------|----------|------------------------------------------------|----------------------------------------------------------------------------------|
+| FOO001 | Linux    | `/home` missing                                | Confirm the root partition or fixture path mounted correctly.                   |
+| FOO002 | Linux    | Unable to enumerate `/home`                    | Fix `stat`/`listdir` permissions or remove filesystem corruption.               |
+| FOO003 | Linux    | Failed to read `<user>/.ssh/id_ed25519`        | Repair ACLs in the `.ssh` directory or delete the stale file handle.            |
+| FOO101 | macOS    | `/Users` missing                               | Ensure the Users volume exists or copy fixtures before running tests.           |
+| FOO102 | macOS    | Unable to enumerate `/Users`                   | Resolve SIP/ACL restrictions blocking directory traversal.                      |
+| FOO103 | macOS    | Failed to read `<user>/.ssh/id_ed25519`        | Check file ownership/permissions and rerun once the `.ssh` folder is readable.  |
+| FOO201 | Windows  | `C:\Users` missing                             | Verify the system drive mapping or fixture copy succeeded.                      |
+| FOO202 | Windows  | Unable to enumerate `C:\Users`                 | Clear antivirus locks or Group Policy that prevents listing user directories.   |
+| FOO203 | Windows  | Failed to read `<user>\.ssh\id_ed25519`        | Adjust NTFS ACLs so the sensor can stat the `.ssh` directory.                   |
+
+On any error the sensor emits nothing to stdout (an empty string) to keep the Tanium ingestion pipeline deterministic.
 
 ## Fixtures
 
@@ -27,7 +46,7 @@ Tests call `prepare_sensor_files("foo", <os>, tmp_path)` which copy the entire `
 
 ## Tanium settings
 
-`sensors/foo/tanium_settings.yaml` captures the metadata required when importing the sensor into Tanium. It declares that the sensor emits two tab-delimited columns (`User`, `SSH Key Status`) and sets operational details like TTL and category. Keep the YAML in sync with any change to the emitted delimiter or column order.
+`sensors/foo/tanium_settings.yaml` captures the metadata required when importing the sensor into Tanium. It declares that the sensor emits two tab-delimited columns (`User`, `SSH Key Status`) and sets operational details like TTL and category. The `User` column explicitly notes the `<unknown>` placeholder so responders understand the sanitization story. Keep the YAML in sync with any change to the emitted delimiter or column order.
 
 ## Tests
 

@@ -12,6 +12,25 @@
 - **コピー対象ロジック**: `# === SENSOR_COPY_BLOCK ...` で囲まれた部分は 3 OS で同一に保つ必要があります。変更時は必ず全ファイルを同期してください。
 - **スコープ制御**: `base_dir` を `Path(base_dir)` に変換し、その配下のみを操作します。
 - **出力フォーマット**: 各ユーザーディレクトリに対して `alice\tExist` や `bob\tNo` のようなタブ区切り行を生成し、改行で結合します。
+- **サニタイズ**: ユーザー名は ASCII の印字可能文字だけを許容し、タブ/改行などの制御文字は `?` に差し替えます。印字可能文字が 1 つも無い場合は `User` 列を `<unknown>` として返します。
+
+## エラーコード
+
+stderr には必ずエラーコードを付与します。以下の表を README で維持し、オペレーターが即座に対処できるようにしてください。
+
+| Code   | OS      | 事象                                           | 対処                                                                       |
+|--------|---------|----------------------------------------------|----------------------------------------------------------------------------|
+| FOO001 | Linux   | `/home` が存在しない                          | ルートパーティションまたは fixture の mount を確認。                       |
+| FOO002 | Linux   | `/home` を列挙できない                        | パーミッションやファイルシステム破損を修正。                               |
+| FOO003 | Linux   | `<user>/.ssh/id_ed25519` を stat できない     | `.ssh` ディレクトリの ACL/所有権を修復し再実行。                            |
+| FOO101 | macOS   | `/Users` が存在しない                         | Users ボリュームまたは fixture を準備してから再実行。                      |
+| FOO102 | macOS   | `/Users` の列挙に失敗                         | SIP/ACL 等でブロックされていないか確認し、権限を戻す。                     |
+| FOO103 | macOS   | `<user>/.ssh/id_ed25519` を stat できない     | `.ssh` ディレクトリの権限/ロックを解除。                                   |
+| FOO201 | Windows | `C:\Users` が存在しない                       | システムドライブまたは fixture コピーの有無を確認。                        |
+| FOO202 | Windows | `C:\Users` の列挙に失敗                       | AV/ポリシーなどでリスト取得が遮断されていないか確認。                      |
+| FOO203 | Windows | `<user>\.ssh\id_ed25519` を stat できない     | NTFS ACL を更新して `.ssh` ディレクトリを読み取り可能にする。             |
+
+いずれのエラーでも `stdout` は空文字のまま返すため、Tanium 側は stderr だけで失敗を検知できます。
 
 ## Fixtures
 
@@ -27,7 +46,7 @@ tests/sensors/foo/fixtures/linux/files/home/erin/.ssh/id_ed25519
 
 ## Tanium 設定
 
-`sensors/foo/tanium_settings.yaml` に Tanium 取り込み用メタデータをまとめています。`multi_column` センサーとしてタブ区切り 2 列（`User`, `SSH Key Status`）を返す点や TTL・カテゴリをここで定義します。出力形式を変えた場合は必ず YAML も更新してください。
+`sensors/foo/tanium_settings.yaml` に Tanium 取り込み用メタデータをまとめています。`multi_column` センサーとしてタブ区切り 2 列（`User`, `SSH Key Status`）を返す点や TTL・カテゴリをここで定義します。`User` 列の description では `<unknown>` プレースホルダーの意味を説明しており、サニタイズ仕様をドキュメント化しています。出力形式を変えた場合は必ず YAML も更新してください。
 
 ## テスト
 

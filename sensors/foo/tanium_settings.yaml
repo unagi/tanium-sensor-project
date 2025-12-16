@@ -5,5 +5,5 @@ tanium:
   multi_column: true
   delimiter: "\t"
   columns:
-    - { name: User, type: text }
+    - { name: User, type: text, description: "Sanitized username (<unknown> when not printable)" }
     - { name: SSH Key Status, type: text }

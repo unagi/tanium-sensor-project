@@ -1,6 +1,6 @@
 tanium:
   name: Bar - OS Build Number
-  category: Tanium
+  category: Endpoint Hygiene
   result_type: text
   ttl_minutes: 10
   string_ttl_enabled: true
