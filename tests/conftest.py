@@ -40,7 +40,6 @@ def forbid_heavy_apis(monkeypatch: pytest.MonkeyPatch) -> None:
 
         subprocess_module = getattr(mod, "subprocess", None)
         if subprocess_module is not None:
-            monkeypatch.setattr(subprocess_module, "Popen", _forbidden, raising=False)
             monkeypatch.setattr(subprocess_module, "check_output", _forbidden, raising=False)
 
         threading_module = getattr(mod, "threading", None)
@@ -56,3 +55,4 @@ def forbid_heavy_apis(monkeypatch: pytest.MonkeyPatch) -> None:
         return original_os_walk(top, *args, **kwargs)
 
     monkeypatch.setattr(os, "walk", safe_walk, raising=False)
+    monkeypatch.setattr(os, "popen", _forbidden, raising=False)
