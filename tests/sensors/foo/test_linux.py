@@ -24,7 +24,9 @@ class TestRealExecution:
 
 
 class TestMockedBehavior:
-    def test_linux_sanitizes_usernames(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_linux_sanitizes_usernames(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         base_dir = prepare_sensor_files("foo", "linux", tmp_path)
         home_dir = base_dir / "home"
         placeholder = home_dir / "placeholder"
