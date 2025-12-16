@@ -7,7 +7,9 @@ import pytest
 from sensors.bar import win
 
 pytestmark = [
-    pytest.mark.skipif(not os.environ.get("CI"), reason="Windows sensor integration test runs in CI only."),
+    pytest.mark.skipif(
+        not os.environ.get("CI"), reason="Windows sensor integration test runs in CI only."
+    ),
     pytest.mark.skipif(sys.platform != "win32", reason="Windows sensor test requires Windows."),
 ]
 

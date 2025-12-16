@@ -48,7 +48,9 @@ def test_win_sanitizes_usernames(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     "exception",
     [PermissionError(errno.EACCES, "Denied"), OSError(errno.ENOENT, "boom")],
 )
-def test_win_handles_iterdir_errors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, exception: OSError) -> None:
+def test_win_handles_iterdir_errors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, exception: OSError
+) -> None:
     base_dir = prepare_sensor_files("foo", "win", tmp_path)
     users_dir = base_dir / "Users"
 

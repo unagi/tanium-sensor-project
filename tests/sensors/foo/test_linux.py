@@ -48,7 +48,9 @@ def test_linux_sanitizes_usernames(tmp_path: Path, monkeypatch: pytest.MonkeyPat
     "exception",
     [PermissionError(errno.EACCES, "Denied"), OSError(errno.ENOENT, "boom")],
 )
-def test_linux_handles_iterdir_errors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, exception: OSError) -> None:
+def test_linux_handles_iterdir_errors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, exception: OSError
+) -> None:
     base_dir = prepare_sensor_files("foo", "linux", tmp_path)
 
     target = linux._home_dir(Path(str(base_dir)))

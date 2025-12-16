@@ -74,7 +74,9 @@ def run_sensor(base_dir: str | None = None) -> str:
         try:
             key_exists = key_file.is_file()
         except OSError as exc:
-            _emit_error(_ERROR_KEY_SCAN_FAILED, f"Cannot determine key status for {user_dir}: {exc}")
+            _emit_error(
+                _ERROR_KEY_SCAN_FAILED, f"Cannot determine key status for {user_dir}: {exc}"
+            )
             key_exists = False
 
         status = "Exist" if key_exists else "No"
