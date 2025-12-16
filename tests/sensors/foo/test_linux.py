@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from sensors.foo import linux
+from tests.helpers.fake_entries import FakeUserDir
 from tests.helpers.fixtures import prepare_sensor_files
 
 
@@ -22,10 +23,22 @@ def test_linux_handles_missing_home(tmp_path: Path) -> None:
     assert result == ""
 
 
-def test_linux_sanitizes_usernames(tmp_path: Path) -> None:
+def test_linux_sanitizes_usernames(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     base_dir = prepare_sensor_files("foo", "linux", tmp_path)
-    weird_user = base_dir / "home" / "   "
-    weird_user.mkdir(parents=True, exist_ok=True)
+    home_dir = base_dir / "home"
+    placeholder = home_dir / "placeholder"
+    placeholder.mkdir(parents=True, exist_ok=True)
+
+    fake_entry = FakeUserDir(path=placeholder, fake_name="\t")
+    original_iterdir = linux.Path.iterdir
+
+    def patched_iterdir(self: Path):
+        entries = list(original_iterdir(self))
+        if self == home_dir:
+            entries.append(fake_entry)
+        return iter(entries)
+
+    monkeypatch.setattr(linux.Path, "iterdir", patched_iterdir, raising=False)
 
     result = linux.run_sensor(base_dir=str(base_dir))
     assert "<unknown>\tNo" in result
