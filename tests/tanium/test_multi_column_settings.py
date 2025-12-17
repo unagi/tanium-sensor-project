@@ -42,9 +42,7 @@ def _parse_multi_column_config(
     delimiter = tanium_section.get("delimiter")
     columns = tanium_section.get("columns", [])
     if not delimiter or not isinstance(columns, list) or not columns:
-        raise AssertionError(
-            f"{settings_path} must define a delimiter and non-empty columns list."
-        )
+        raise AssertionError(f"{settings_path} must define a delimiter and non-empty columns list.")
     _ensure_text_first_column(settings_path, columns)
     return str(delimiter), columns
 
