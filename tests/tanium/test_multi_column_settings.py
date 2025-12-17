@@ -46,6 +46,16 @@ def _iter_multi_column_cases() -> list[_MultiColumnCase]:
             raise AssertionError(
                 f"{settings_path} must define a delimiter and non-empty columns list."
             )
+        first_column = columns[0]
+        if not isinstance(first_column, dict):
+            raise AssertionError(
+                f"{settings_path} column entries must be mappings with name/type keys."
+            )
+        first_type = str(first_column.get("type", "text")).lower()
+        if first_type not in {"text", "string"}:
+            raise AssertionError(
+                f"{settings_path} first column must be text/string to carry the '[no results]' placeholder."
+            )
 
         sensor_name = sensor_dir.name
         sensor_fixtures_root = fixtures_root / sensor_name / "fixtures"

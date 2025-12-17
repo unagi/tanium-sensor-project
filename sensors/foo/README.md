@@ -11,7 +11,7 @@ This document walks through how the sample `foo` sensor is put together so you c
   - Linux: `/home`
 - **Copy-aware logic**: The block wrapped by `# === SENSOR_COPY_BLOCK ...` must stay identical across the OS files; update all three files when making changes.
 - **Scope control**: `base_dir` is converted to `Path(base_dir)` and all filesystem operations stay beneath that directory.
-- **Output**: One tab-separated line per user directory, e.g. `alice	Exist` or `bob	No`.
+- **Output**: One tab-separated line per user directory, e.g. `alice	Exist` or `bob	No`. When a scan completes successfully but finds no qualifying users, the sensor emits the Tanium-standard placeholder line `[no results]` in the `User` column and leaves the `SSH Key Status` column empty (i.e., `[no results]	`).
 - **Sanitization**: Usernames are restricted to printable ASCII; any tab/newline/control characters become `?`. If no printable characters remain the sensor emits `<unknown>` in the `User` column.
 
 ## Error codes
@@ -30,7 +30,7 @@ All stderr diagnostics begin with an error code so Tanium operators can triage q
 | FOO202 | Windows  | Unable to enumerate `C:\Users`                 | Clear antivirus locks or Group Policy that prevents listing user directories.   |
 | FOO203 | Windows  | Failed to read `<user>\.ssh\id_ed25519`        | Adjust NTFS ACLs so the sensor can stat the `.ssh` directory.                   |
 
-On any error the sensor emits nothing to stdout (an empty string) to keep the Tanium ingestion pipeline deterministic.
+On any error the sensor still emits nothing to stdout so Tanium can treat the run as a failure, but a successful scan with zero matches now returns the placeholder row `[no results]	` instead of an empty string.
 
 ## Fixtures
 
@@ -46,7 +46,7 @@ Tests call `prepare_sensor_files("foo", <os>, tmp_path)` which copy the entire `
 
 ## Tanium settings
 
-`sensors/foo/tanium_settings.yaml` captures the metadata required when importing the sensor into Tanium. It declares that the sensor emits two tab-delimited columns (`User`, `SSH Key Status`) and sets operational details like TTL and category. The `User` column explicitly notes the `<unknown>` placeholder so responders understand the sanitization story. Keep the YAML in sync with any change to the emitted delimiter or column order.
+`sensors/foo/tanium_settings.yaml` captures the metadata required when importing the sensor into Tanium. It declares that the sensor emits two tab-delimited columns (`User`, `SSH Key Status`) and sets operational details like TTL and category. The `User` column remains type `text` so Tanium can safely ingest the `[no results]` placeholder row, and `Text` is also the recommended fallback if a future console build ever changes the available result-type list. Keep the YAML in sync with any change to the emitted delimiter or column order.
 
 ## Tests
 

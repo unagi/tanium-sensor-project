@@ -1,4 +1,5 @@
 import errno
+import shutil
 from pathlib import Path
 
 import pytest
@@ -21,6 +22,18 @@ class TestRealExecution:
     def test_win_handles_missing_users(self, tmp_path: Path) -> None:
         result = win.run_sensor(base_dir=str(tmp_path))
         assert result == ""
+
+    def test_win_emits_placeholder_when_no_users(self, tmp_path: Path) -> None:
+        base_dir = prepare_sensor_files("foo", "win", tmp_path)
+        users_dir = base_dir / "Users"
+        for entry in list(users_dir.iterdir()):
+            if entry.is_dir():
+                shutil.rmtree(entry)
+            else:
+                entry.unlink()
+
+        result = win.run_sensor(base_dir=str(base_dir))
+        assert result == "[no results]\t"
 
 
 class TestMockedBehavior:

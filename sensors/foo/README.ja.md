@@ -11,7 +11,7 @@
   - Linux: `/home`
 - **コピー対象ロジック**: `# === SENSOR_COPY_BLOCK ...` で囲まれた部分は 3 OS で同一に保つ必要があります。変更時は必ず全ファイルを同期してください。
 - **スコープ制御**: `base_dir` を `Path(base_dir)` に変換し、その配下のみを操作します。
-- **出力フォーマット**: 各ユーザーディレクトリに対して `alice\tExist` や `bob\tNo` のようなタブ区切り行を生成し、改行で結合します。
+- **出力フォーマット**: 各ユーザーディレクトリに対して `alice\tExist` や `bob\tNo` のようなタブ区切り行を生成し、改行で結合します。該当ユーザーが 1 件もない場合は、Tanium 標準の `[no results]` 行を最初の列に出力し、2 列目は空欄（`[no results]\t`）として戻します。
 - **サニタイズ**: ユーザー名は ASCII の印字可能文字だけを許容し、タブ/改行などの制御文字は `?` に差し替えます。印字可能文字が 1 つも無い場合は `User` 列を `<unknown>` として返します。
 
 ## エラーコード
@@ -30,7 +30,7 @@ stderr には必ずエラーコードを付与します。以下の表を README
 | FOO202 | Windows | `C:\Users` の列挙に失敗                       | AV/ポリシーなどでリスト取得が遮断されていないか確認。                      |
 | FOO203 | Windows | `<user>\.ssh\id_ed25519` を stat できない     | NTFS ACL を更新して `.ssh` ディレクトリを読み取り可能にする。             |
 
-いずれのエラーでも `stdout` は空文字のまま返すため、Tanium 側は stderr だけで失敗を検知できます。
+エラー時は引き続き `stdout` を空文字のままにし、Tanium 側が失敗と判断できるようにします。一方、正常終了かつ該当ユーザーが 0 件のときは `[no results]\t` を返し、空文字にはしません。
 
 ## Fixtures
 
@@ -46,7 +46,7 @@ tests/sensors/foo/fixtures/linux/files/home/erin/.ssh/id_ed25519
 
 ## Tanium 設定
 
-`sensors/foo/tanium_settings.yaml` に Tanium 取り込み用メタデータをまとめています。`multi_column` センサーとしてタブ区切り 2 列（`User`, `SSH Key Status`）を返す点や TTL・カテゴリをここで定義します。`User` 列の description では `<unknown>` プレースホルダーの意味を説明しており、サニタイズ仕様をドキュメント化しています。出力形式を変えた場合は必ず YAML も更新してください。
+`sensors/foo/tanium_settings.yaml` に Tanium 取り込み用メタデータをまとめています。`multi_column` センサーとしてタブ区切り 2 列（`User`, `SSH Key Status`）を返す点や TTL・カテゴリをここで定義します。`User` 列は text 型として宣言し、`[no results]` プレースホルダーや `<unknown>` のサニタイズ仕様を description で説明しています。将来コンソール側で利用可能な結果型のリストが変わった場合でも、判断に迷うときは `Text` へフォールバックする方針です。出力形式を変えた場合は必ず YAML も更新してください。
 
 ## テスト
 
