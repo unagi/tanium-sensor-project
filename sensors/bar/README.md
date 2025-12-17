@@ -22,7 +22,7 @@ The `bar` sensor reports the platform build identifier (Windows build number, ma
 | BAR201 | macOS    | `sw_vers -buildVersion` failed or timed out | Ensure `/usr/bin/sw_vers` exists and SIP hasn't removed it.               |
 | BAR202 | macOS    | `sw_vers -buildVersion` returned non-zero | Inspect `sw_vers` for errors (e.g., corrupted plists) and rerun.              |
 
-All error codes emit stderr only; stdout stays empty so Tanium can treat any missing value as failure.
+All error codes emit stderr only; stdout stays empty so Tanium can treat the run as a failure. During normal operation the sensor always returns exactly one build identifier, so the `[no results]` placeholder is never expected here.
 
 ## Tanium metadata
 
@@ -43,4 +43,4 @@ python sensors/bar/mac.py
 python sensors/bar/linux.py
 ```
 
-On non-matching platforms the command may fail or return an empty string, which is acceptable during local smoke tests. CI covers the platform-specific validation paths.
+On non-matching platforms the command may fail and therefore produce an empty stdout value, which is acceptable during local smoke tests. CI covers the platform-specific validation paths on each OS.

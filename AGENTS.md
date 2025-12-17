@@ -40,15 +40,16 @@ Always write and maintain this handbook in English so every agent references the
      | 2025-12-15 | Jane Smith (DL) | Needs 3s to parse 500MB archive header safely | 3s          |
      ```
 6. **Predictable footprint**: Never add behaviors that could enumerate unbounded directories, buffer huge files, or otherwise hammer disks. Cap traversal scope aggressively so even pathological endpoints stay lightweight.
-7. **Return format**: Currently each sensor returns lines formatted as `"<user>\t<Exist|No>"`. Keep output consistent with Tanium’s expectations, and deterministically sort the rows with a case-sensitive key tailored to the sensor so identical inputs always yield identical outputs.
-8. **Clean output**: Avoid blank lines, trailing whitespace, or redundant newlines. If there is no data, return an empty string rather than a newline so ingestion pipelines stay predictable.
+7. **Return format**: Currently each sensor returns lines formatted as `"<user>\t<Exist|No>"`. Keep output consistent with Tanium’s expectations, and deterministically sort the rows with a case-sensitive key tailored to the sensor so identical inputs always yield identical outputs. Multi-column sensors **must** declare a text-typed first column so that Tanium can accept human-readable placeholder rows (see rule 8).
+8. **Clean output**: Avoid blank lines, trailing whitespace, or redundant newlines. When a run finds no records, emit a single line placeholder of `[no results]` instead of returning an empty string. Single-column sensors should return exactly `[no results]` (no delimiter), while multi-column sensors must keep the declared column count by placing `[no results]` in the first column and leaving subsequent columns empty (e.g., `"[no results]\t\t"` for a three-column sensor). This mirrors the built-in Tanium sensors and keeps downstream modules from inferring “sensor failure” when the data flow is merely empty.
 9. **Error handling**: Define sensor-specific error codes for predictable failure modes (missing `base_dir`, unreadable file, malformed record, etc.). Emit concise human-readable diagnostics to `stderr` prefixed with the code, and leave `stdout` untouched so Tanium can detect failures programmatically.
    - Document every error code in `sensors/<sensor>/README.md` with a short description and the remediation steps (what the operator should verify or fix when the code appears) so responders can act without reading the source.
 10. **Sensitive data handling**: Never write plaintext credentials, tokens, PII, or other sensitive material directly to `stdout` or `stderr`. Hash, truncate, or mask these values before logging, and prefer emitting only boolean/aggregate signals when practical.
     - When a sensor might encounter sensitive data and applies masking, document the technique (e.g., SHA-256 hash, first-3-last-2 masking) in `sensors/<sensor>/README.md` so reviewers and responders know what to expect.
     - Do not persist sensitive data to temporary files, caches, or logs under `base_dir`—read the minimum necessary bytes, derive the boolean you need, then immediately discard any buffers.
 11. **Input sanitization**: Sanitize or escape anything sourced from outside the code (filesystem contents, env vars, or limited OS call outputs) so delimiters, tabs, or binary blobs cannot corrupt the payload. Never inject raw external strings directly into the formatter.
-12. **Tanium settings file**: `tanium_settings.yaml` must describe how Tanium ingests the sensor output. Example schema:
+12. **Tanium result types**: The current console UI exposes nine result types: `Text`, `File Size`, `IP Address`, `Version`, `Numeric`, `Date/Time (RFC822)`, `Date/Time (WMI)`, `Time Duration`, and `Integer`. Always pick the most precise type, but if a later release changes the list and you cannot confirm a better fit, fall back to `Text` so ingestion never breaks.
+13. **Tanium settings file**: `tanium_settings.yaml` must describe how Tanium ingests the sensor output. Example schema:
    ```yaml
    tanium:
      name: Foobar - Logon Events
@@ -62,7 +63,12 @@ Always write and maintain this handbook in English so every agent references the
    ```
    Ensure `delimiter` and `columns` match the actual string format the OS files emit. For multi-column sensors, pick a delimiter that cannot appear in sanitized values; if that is impossible, escape the delimiter consistently so shared Tanium metadata tests keep passing.
 
-## 3. Fixtures and Test Flow
+## 3. WSL-Specific Guidance
+
+- Never launch WSL solely to gather data—the act of starting the subsystem alters host state and violates the read-only requirement. You may perform limited inspection only if WSL is already running when the sensor starts.
+- Even when WSL is active, restrict investigations to passive reads (checking file existence, reading contents, or running single commands that have no side effects inside the WSL instance). Complex workflows, service manipulation, or broad recursive scans are out of scope; WSL sensors should stay lightweight and best-effort because guaranteeing their fidelity is harder than for native OS targets.
+
+## 4. Fixtures and Test Flow
 
 - Use `tests/helpers/fixtures.py::prepare_sensor_files(sensor, os, tmp_path)` to copy `tests/sensors/<sensor>/fixtures/<os>/files` into a temp directory, then call `run_sensor(base_dir=str(copied_path))`.
 - The fixture tree should mimic real OS roots: `files/Users` (= `C\\Users` or `/Users`) or `files/home` (= `/home`). Tests pass the `files` directory, and sensors append `Users` or `home` as needed.
@@ -74,7 +80,7 @@ Always write and maintain this handbook in English so every agent references the
 - `pyproject.toml` configures pytest (`testpaths = ["tests"], `timeout = 1`, `timeout_method = "thread"`). Install `pytest-timeout` so these options work; Windows runners cannot use `signal`, so we stick with the thread-based timeout for portability.
 - Keep each test under one second. Mark slow tests with `@pytest.mark.slow` so CI can skip them.
 
-## 4. Tooling and CI
+## 5. Tooling and CI
 
 - Install dev tools via `pip install -e ".[dev]"` or `uv pip install -e ".[dev]"` (Ruff, Black, pytest, pytest-timeout, Poe).
 - Local Poe tasks (run before every PR):
@@ -88,14 +94,14 @@ Always write and maintain this handbook in English so every agent references the
   If you are not using `uv`, activate your env first and run `poe <task>`.
 - `.github/workflows/ci.yml` calls the same Poe tasks on GitHub Actions, so keep them up to date whenever workflows change.
 
-## 5. Workflow Guidance
+## 6. Workflow Guidance
 
 1. When adding sensors, copy `sensors/foo/` as a template, rename it, and adjust docstrings/logic per OS—keeping copy-block markers.
 2. Build fixtures first under `tests/sensors/<sensor>/fixtures/<os>/files`, then add tests under `tests/sensors/<sensor>/test_<os>.py` that call `prepare_sensor_files()`.
 3. Use concise ASCII comments only when logic is non-trivial.
 4. Do not remove the `sys.path` bootstrap in `tests/conftest.py`; pytest relies on it for module imports.
 
-## 6. Common Pitfalls
+## 7. Common Pitfalls
 
 - **Shared module temptation**: Resist adding `common.py`; single-file copy/paste is intentional for Tanium deployment.
 - **Wrong fixture root**: Always pass `<tmp>/.../files` as `base_dir`; let sensors append `Users`/`home`.

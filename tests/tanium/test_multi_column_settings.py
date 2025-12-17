@@ -20,6 +20,33 @@ class _MultiColumnCase(TypedDict):
     columns: list[dict[str, object]]
 
 
+def _ensure_text_first_column(settings_path: Path, columns: list[dict[str, object]]) -> None:
+    first_column = columns[0]
+    if not isinstance(first_column, dict):
+        raise AssertionError(
+            f"{settings_path} column entries must be mappings with name/type keys."
+        )
+    first_type = str(first_column.get("type", "text")).lower()
+    if first_type not in {"text", "string"}:
+        raise AssertionError(
+            f"{settings_path} first column must be text/string to carry the '[no results]' placeholder."
+        )
+
+
+def _parse_multi_column_config(
+    settings_path: Path, tanium_section: dict[str, object]
+) -> tuple[str, list[dict[str, object]]] | None:
+    if not tanium_section.get("multi_column"):
+        return None
+
+    delimiter = tanium_section.get("delimiter")
+    columns = tanium_section.get("columns", [])
+    if not delimiter or not isinstance(columns, list) or not columns:
+        raise AssertionError(f"{settings_path} must define a delimiter and non-empty columns list.")
+    _ensure_text_first_column(settings_path, columns)
+    return str(delimiter), columns
+
+
 def _iter_multi_column_cases() -> list[_MultiColumnCase]:
     repo_root = Path(__file__).resolve().parents[2]
     sensors_root = repo_root / "sensors"
@@ -37,15 +64,11 @@ def _iter_multi_column_cases() -> list[_MultiColumnCase]:
 
         tanium_cfg = yaml.safe_load(settings_path.read_text()) or {}
         tanium_section = tanium_cfg.get("tanium", {})
-        if not tanium_section.get("multi_column"):
+        parsed = _parse_multi_column_config(settings_path, tanium_section)
+        if parsed is None:
             continue
 
-        delimiter = tanium_section.get("delimiter")
-        columns = tanium_section.get("columns", [])
-        if not delimiter or not isinstance(columns, list) or not columns:
-            raise AssertionError(
-                f"{settings_path} must define a delimiter and non-empty columns list."
-            )
+        delimiter, columns = parsed
 
         sensor_name = sensor_dir.name
         sensor_fixtures_root = fixtures_root / sensor_name / "fixtures"

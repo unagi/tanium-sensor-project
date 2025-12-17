@@ -1,4 +1,5 @@
 import errno
+import shutil
 from pathlib import Path
 
 import pytest
@@ -21,6 +22,18 @@ class TestRealExecution:
     def test_linux_handles_missing_home(self, tmp_path: Path) -> None:
         result = linux.run_sensor(base_dir=str(tmp_path))
         assert result == ""
+
+    def test_linux_emits_placeholder_when_no_users(self, tmp_path: Path) -> None:
+        base_dir = prepare_sensor_files("foo", "linux", tmp_path)
+        home_dir = base_dir / "home"
+        for entry in list(home_dir.iterdir()):
+            if entry.is_dir():
+                shutil.rmtree(entry)
+            else:
+                entry.unlink()
+
+        result = linux.run_sensor(base_dir=str(base_dir))
+        assert result == "[no results]\t"
 
 
 class TestMockedBehavior:

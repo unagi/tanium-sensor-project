@@ -21,7 +21,7 @@
 | BAR201 | macOS   | `sw_vers -buildVersion` 実行失敗/タイムアウト | `/usr/bin/sw_vers` が存在し SIP が邪魔していないか確認。           |
 | BAR202 | macOS   | `sw_vers -buildVersion` の終了コードが非 0 | `sw_vers` が参照する plist の破損を修復し再実行。                   |
 
-いずれのケースでも stdout は空文字のままなので、Tanium 側は stderr のコードを見て異常を判別できます。
+いずれのケースでも（エラー発生時は）stdout を空文字のままにしているため、Tanium 側は stderr のコードを頼りに失敗を判別できます。通常運用では常に 1 行のビルド ID を返すため、このセンサーで `[no results]` プレースホルダーが使われることはありません。
 
 ## Tanium メタデータ
 
@@ -42,4 +42,4 @@ python sensors/bar/mac.py
 python sensors/bar/linux.py
 ```
 
-異なる OS 上ではコマンドが失敗して空文字になる場合がありますが、ローカルの簡易チェックでは許容範囲です。プラットフォーム固有の確認は CI に任せてください。
+異なる OS 上ではコマンドが失敗し stdout が空文字（=失敗扱い）になる場合がありますが、ローカルの簡易チェックでは許容範囲です。プラットフォーム固有の確認は CI に任せてください。

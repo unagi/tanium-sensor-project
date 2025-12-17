@@ -83,7 +83,10 @@ def run_sensor(base_dir: str | None = None) -> str:
         user_name = _sanitize_user(user_dir.name)
         results.append(f"{user_name}\t{status}")
 
-    return "\n".join(results)
+    if results:
+        return "\n".join(results)
+
+    return "[no results]\t"
     # === SENSOR_COPY_BLOCK END ===
 
 
