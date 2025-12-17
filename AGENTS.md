@@ -14,7 +14,7 @@ Always write and maintain this handbook in English so every agent references the
 
 ## 2. Sensor Implementation Rules
 
-1. **Fixed signature**: Every OS file defines `run_sensor(base_dir: str | None = None) -> str` and ends with `if __name__ == "__main__": print(run_sensor())`.
+1. **Fixed signature with size budget**: Every OS file defines `run_sensor(base_dir: str | None = None) -> str` and ends with `if __name__ == "__main__": print(run_sensor())`. Keep each OS implementation lean so the combined `win.py`/`mac.py`/`linux.py` footprint stays under 45,000 characters (target ≤15,000 per file); the CI guardrail lives in `tests/tanium/test_sensor_size_budget.py` and will fail sensors that exceed the budget.
 2. **No access outside `base_dir`**: Only when `base_dir is None` may you compute the OS default path; otherwise operate strictly within `Path(base_dir)`.
 3. **Copy/paste governance**:
    - Even if logic looks similar, do not create shared modules—**copy the logic intentionally**.
@@ -74,6 +74,7 @@ Always write and maintain this handbook in English so every agent references the
 - The fixture tree should mimic real OS roots: `files/Users` (= `C\\Users` or `/Users`) or `files/home` (= `/home`). Tests pass the `files` directory, and sensors append `Users` or `home` as needed.
 - Need an empty directory (e.g., a user without `.ssh`)? Drop a placeholder file like `.gitkeep` so Git tracks it; otherwise fixtures will silently omit that directory.
 - Common validation under `tests/tanium/` loads every `tanium_settings.yaml` and verifies sensor output (delimiter, column count/types). Keep manifests accurate or these shared tests will fail.
+- `tests/tanium/test_sensor_size_budget.py` enforces the 45,000 character combined / 15,000 character per-file implementation budget for every sensor, so shrink code before merging if the test fails.
 - **OS-native execution tests**: if a sensor shells out (e.g., `uname`, `sw_vers`, `cmd /c ver`), at least one pytest per OS must execute the real command so CI proves the integration path end-to-end. Gate these with `pytest.mark.skipif(not os.environ.get("CI"), ...)` and a platform check so local runs stay fast.
 - **Test categorization**: structure pytest modules so spec output makes it obvious whether a case performs “Real Execution” (exercising actual filesystem/OS behavior) or “Mocked Behavior” (simulated edge cases). Using pytest class names for these groups keeps the pytest-spec report scannable and enforces a consistent naming convention across sensors.
 - Performance validation: add at least one test per sensor that measures `run_sensor()` with `time.perf_counter()` (or mocks slow dependencies) and asserts the elapsed wall time stays within the approved budget. For logic that cannot run deterministically on the developer workstation (sanitization, transient filesystem errors), you may mock at the Python layer, but **do not** mock the OS command tests described above—actual binaries must run in CI.
