@@ -32,17 +32,13 @@ def test_sensor_source_files_remain_within_budget():  # pragma: no cover - repo 
             per_file_counts.append((os_name, char_count))
             total_chars += char_count
 
-            assert (
-                char_count <= MAX_PER_FILE_CHARS
-            ), (
+            assert char_count <= MAX_PER_FILE_CHARS, (
                 f"{sensor_dir.name}/{os_name}.py is {char_count} characters, exceeding the"
                 f" {MAX_PER_FILE_CHARS} character per-file guidance. Trim the implementation or split logic."
             )
 
         assert not missing_files, f"{sensor_dir.name} is missing: {', '.join(missing_files)}"
-        assert (
-            total_chars <= MAX_TOTAL_CHARS
-        ), (
+        assert total_chars <= MAX_TOTAL_CHARS, (
             f"{sensor_dir.name} total source size is {total_chars} characters across win/mac/linux,"
             f" exceeding the {MAX_TOTAL_CHARS} character budget. Counts: "
             + ", ".join(f"{name}:{count}" for name, count in per_file_counts)
